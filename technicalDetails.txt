@@ -28,6 +28,7 @@ Training Data: about 1100 images
 ~ 350 black occupied
 ~ 350 white occupied
 ~ 400 empty 
+Note: Ended up not using the labeledData.csv file and just labeling images as they were loaded into the dataset. The images were mostly already trimmed down to a view of a singe square on the chess board. 
 
 Images resized to 60x60 pixels
 Scaled to 0-1 range by dividing pixel values by 255
