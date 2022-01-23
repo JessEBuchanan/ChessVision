@@ -20,7 +20,7 @@ from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout
 from keras.preprocessing.image import ImageDataGenerator
 
 #model training
-dim = 100
+dim = 60
 size = (dim,dim)
 image_list = []
 label_list_binary = []
@@ -75,7 +75,7 @@ datagen = ImageDataGenerator(
 datagen.fit(x_train)
 
 model = Sequential()
-model.add(Conv2D(32,3,padding="same", activation="relu", input_shape=(100,100,3)))
+model.add(Conv2D(32,3,padding="same", activation="relu", input_shape=(60,60,3)))
 model.add(MaxPool2D())
 
 model.add(Conv2D(32, 3, padding="same", activation="relu"))
