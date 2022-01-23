@@ -8,91 +8,26 @@ from keras_preprocessing import image
 from scikeras.wrappers import KerasClassifier, KerasRegressor
 import cv2
 import glob
-from pyforms import start_app
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout 
+from keras.models import model_from_json
+import os
+
 
 class chessSquare:
      
     def __init__(self, name, startRow, endRow, startCol, endCol): #name is the square name, space is the subarray range within the chessboard
-        squares ={ 
-            'a1' : 'black',
-            'a2' : 'white',
-            'a3' : 'black',
-            'a4' : 'white',
-            'a5' : 'black',
-            'a6' : 'white',
-            'a7' : 'black',
-            'a8' : 'white',
-            'b1' : 'white',
-            'b2' : 'black',
-            'b3' : 'white',
-            'b4' : 'black',
-            'b5' : 'white',
-            'b6' : 'black',
-            'b7' : 'white',
-            'b8' : 'black',
-            'c1' : 'black',
-            'c2' : 'white',
-            'c3' : 'black',
-            'c4' : 'white',
-            'c5' : 'black',
-            'c6' : 'white',
-            'c7' : 'black',
-            'c8' : 'white',
-            'd1' : 'white',
-            'd2' : 'black',
-            'd3' : 'white',
-            'd4' : 'black',
-            'd5' : 'white',
-            'd6' : 'black',
-            'd7' : 'white',
-            'd8' : 'black',
-            'e1' : 'black',
-            'e2' : 'white',
-            'e3' : 'black',
-            'e4' : 'white',
-            'e5' : 'black',
-            'e6' : 'white',
-            'e7' : 'black',
-            'e8' : 'white',
-            'f1' : 'white',
-            'f2' : 'black',
-            'f3' : 'white',
-            'f4' : 'black',
-            'f5' : 'white',
-            'f6' : 'black',
-            'f7' : 'white',
-            'f8' : 'black',
-            'g1' : 'black',
-            'g2' : 'white',
-            'g3' : 'black',
-            'g4' : 'white',
-            'g5' : 'black',
-            'g6' : 'white',
-            'g7' : 'black',
-            'g8' : 'white',
-            'h1' : 'white',
-            'h2' : 'black',
-            'h3' : 'white',
-            'h4' : 'black',
-            'h5' : 'white',
-            'h6' : 'black',
-            'h7' : 'white',
-            'h8' : 'black',
-            }
+        
         self.name = name
         self.StartRow = startRow #may not need to adjust these numbers
         self.EndRow = endRow
         self.StartCol = startCol
         self.EndCol = endCol
-        self.color = squares[name] #probably don't need this
         self.occupied = 0
 
 class chessPiece: 
-    def __init__(self, name,color, start):
+    def __init__(self, name, start):
         self.name = name
-        self.color = color
         self.current = start
         
 def getBoardDim(image): #determines approximate dimensions of each square
@@ -108,58 +43,61 @@ def newGame(board, boardDim): #uses dimensions of the board image to partition i
     for i in range(0,8):
         for j in range(0,8):
             spaces[i][j]=chessSquare(files[j]+ranks[i],(boardDim*i),(boardDim*(i+1)),(boardDim*j),(boardDim*(j+1)))
+
+    empty = []
+    for i in range(2,6):
+        for j in range(0,8):
+            empty.append(chessPiece('empty', spaces[i][j]))
  
     
     blackPieces = []
     whitePieces = []
 
-    blackPieces.append(chessPiece('blackLightRook','black',spaces[7][7].name))
-    blackPieces.append(chessPiece('blackDarkKnight', 'black', spaces[7][6].name))
-    blackPieces.append(chessPiece('blackLightBishop', 'black', spaces[7][5].name))
-    blackPieces.append(chessPiece('blackQueen', 'black', spaces[7][4].name))
-    blackPieces.append(chessPiece('blackKing', 'black', spaces[7][3].name))
-    blackPieces.append(chessPiece('blackDarkBishop', 'black', spaces[7][2].name))
-    blackPieces.append(chessPiece('blackLightKnight', 'black', spaces[7][1].name))
-    blackPieces.append(chessPiece('blackDarkRook', 'black', spaces[7][0].name))
-    blackPieces.append(chessPiece('blackAPawn', 'black', spaces[6][7].name))
-    blackPieces.append(chessPiece('blackBPawn', 'black', spaces[6][6].name))
-    blackPieces.append(chessPiece('blackCPawn', 'black', spaces[6][5].name))
-    blackPieces.append(chessPiece('blackDPawn', 'black', spaces[6][4].name))
-    blackPieces.append(chessPiece('blackEPawn', 'black', spaces[6][3].name))
-    blackPieces.append(chessPiece('blackFPawn', 'black', spaces[6][2].name))
-    blackPieces.append(chessPiece('blackGPawn', 'black', spaces[6][1].name))
-    blackPieces.append(chessPiece('blackHPawn', 'black', spaces[6][0].name))
+    blackPieces.append(chessPiece('blackLightRook',spaces[7][7]))
+    blackPieces.append(chessPiece('blackDarkKnight', spaces[7][6]))
+    blackPieces.append(chessPiece('blackLightBishop', spaces[7][5]))
+    blackPieces.append(chessPiece('blackQueen', spaces[7][4]))
+    blackPieces.append(chessPiece('blackKing', spaces[7][3]))
+    blackPieces.append(chessPiece('blackDarkBishop', spaces[7][2]))
+    blackPieces.append(chessPiece('blackLightKnight', spaces[7][1]))
+    blackPieces.append(chessPiece('blackDarkRook', spaces[7][0]))
+    blackPieces.append(chessPiece('blackAPawn', spaces[6][7]))
+    blackPieces.append(chessPiece('blackBPawn', spaces[6][6]))
+    blackPieces.append(chessPiece('blackCPawn', spaces[6][5]))
+    blackPieces.append(chessPiece('blackDPawn', spaces[6][4]))
+    blackPieces.append(chessPiece('blackEPawn', spaces[6][3]))
+    blackPieces.append(chessPiece('blackFPawn', spaces[6][2]))
+    blackPieces.append(chessPiece('blackGPawn', spaces[6][1]))
+    blackPieces.append(chessPiece('blackHPawn', spaces[6][0]))
 
-    whitePieces.append(chessPiece('whiteDarkRook','white', spaces[0][7].name))
-    whitePieces.append(chessPiece('whiteLightKnight', 'white', spaces[0][6].name))
-    whitePieces.append(chessPiece('whiteDarkBishop', 'white', spaces[0][5].name))
-    whitePieces.append(chessPiece('whiteQueen', 'white', spaces[0][4].name))
-    whitePieces.append(chessPiece('whiteKing', 'white', spaces[0][3].name))
-    whitePieces.append(chessPiece('whiteLightBishop', 'white', spaces[0][2].name))
-    whitePieces.append(chessPiece('whiteDarkKnight', 'white', spaces[0][1].name))
-    whitePieces.append(chessPiece('whiteLightRook', 'white', spaces[0][0].name))
-    whitePieces.append(chessPiece('whiteAPawn', 'white', spaces[1][7].name))
-    whitePieces.append(chessPiece('whiteBPawn', 'white', spaces[1][6].name))
-    whitePieces.append(chessPiece('whiteCPawn', 'white', spaces[1][5].name))
-    whitePieces.append(chessPiece('whiteDPawn', 'white', spaces[1][4].name))
-    whitePieces.append(chessPiece('whiteEPawn','white', spaces[1][3].name))
-    whitePieces.append(chessPiece('whiteFPawn', 'white', spaces[1][2].name))
-    whitePieces.append(chessPiece('whiteGPawn', 'white', spaces[1][1].name))
-    whitePieces.append(chessPiece('whiteHPawn', 'white', spaces[1][0].name))
+    whitePieces.append(chessPiece('whiteDarkRook', spaces[0][7]))
+    whitePieces.append(chessPiece('whiteLightKnight', spaces[0][6]))
+    whitePieces.append(chessPiece('whiteDarkBishop', spaces[0][5]))
+    whitePieces.append(chessPiece('whiteQueen', spaces[0][4]))
+    whitePieces.append(chessPiece('whiteKing', spaces[0][3]))
+    whitePieces.append(chessPiece('whiteLightBishop',  spaces[0][2]))
+    whitePieces.append(chessPiece('whiteDarkKnight',  spaces[0][1]))
+    whitePieces.append(chessPiece('whiteLightRook',  spaces[0][0]))
+    whitePieces.append(chessPiece('whiteAPawn',  spaces[1][7]))
+    whitePieces.append(chessPiece('whiteBPawn',  spaces[1][6]))
+    whitePieces.append(chessPiece('whiteCPawn',  spaces[1][5]))
+    whitePieces.append(chessPiece('whiteDPawn',  spaces[1][4]))
+    whitePieces.append(chessPiece('whiteEPawn', spaces[1][3]))
+    whitePieces.append(chessPiece('whiteFPawn',  spaces[1][2]))
+    whitePieces.append(chessPiece('whiteGPawn',  spaces[1][1]))
+    whitePieces.append(chessPiece('whiteHPawn',  spaces[1][0]))
 
-    return spaces, blackPieces, whitePieces
+    return spaces, blackPieces, whitePieces, empty
 
-def checkOccupied(chessSpace, image, dim):
+def checkOccupied(chessSpace, image):
     space = image[chessSpace.StartRow:chessSpace.EndRow, chessSpace.StartCol:chessSpace.EndCol]
-    imageResize = cv2.resize(space, (dim,dim), cv2.INTER_LINEAR)
-    #gray = cv2.cvtColor(imageResize, cv2.COLOR_BGR2GRAY)
-    grayArray = np.zeros((1,dim,dim,3))
-    #grayArray = grayArray
+    imageResize = cv2.resize(space, (60,60), cv2.INTER_LINEAR)
+    grayArray = np.zeros((1,60,60,3))
     grayArray[0] = imageResize
-    y_pred = model.predict(grayArray)
+    y_pred = loaded_model.predict(grayArray)
     #print(y_pred)
     pred = np.argmax(y_pred[0])
-    chessSpace.occupied = pred
+    return pred
 
 class staticROI(object):
     def __init__(self):
@@ -248,58 +186,127 @@ class staticROI(object):
     def show_cropped_ROI(self):
         cv2.imshow('Cropped play area', self.cropped_image)
 
-dim = 100
-size = (dim,dim)
+
+def newBoard():
+    newBoard = staticROI()
+    board = newBoard.croppedPlay
+    boardDim = getBoardDim(board)
+    return board, boardDim
+    
+
+def checkPosition(frame,turn, whitePieces, blackPieces, empty): 
+    
+    if turn%2 == 0: #check if black's turn or white
+        print('Black Turn: ', turn)
+        movedPiece = blackPieces[len(blackPieces)-1]
+        for piece in blackPieces:
+            space = checkOccupied(piece.current, frame)
+            if space ==0:
+                movedPiece = piece
+                break
+        for piece in reversed(empty):
+            space = checkOccupied(piece.current, frame)
+            if space != 0:
+                filledSpace = piece
+                blackPieces.remove(movedPiece)
+                blackPieces.append(filledSpace)
+                empty.remove(filledSpace)
+                empty.append(movedPiece)
+                print('Moved: ', movedPiece.name, 'from ', movedPiece.current.name, 'to ', filledSpace.current.name)
+                movedPiece.name, filledSpace.name = filledSpace.name, movedPiece.name #swap spaces
+                return
+        for piece in whitePieces:
+                space = checkOccupied(piece.current, frame)
+                if space !=2: #indicates taken piece
+                    movedPiece[0].current = piece.current
+                    whitePieces.remove(piece) # remove piece from the game
+                    blackPieces.remove(movedPiece)
+                    blackPieces.append(piece)
+                    print(movedPiece.name, 'took ', piece.name, 'on ', filledSpace.current.name)
+                    movedPiece.name, piece.name = piece.name, movedPiece.name #swap spaces
+                    return
+
+    else: #white's turn
+        print('White Turn: ', turn)
+        movedPiece = whitePieces[len(whitePieces)-1] # ensures this has a value if moved piece not found
+        for piece in whitePieces:
+            space = checkOccupied(piece.current, frame)
+            if space ==0:
+                movedPiece = piece
+                break
+        for piece in empty:
+            space = checkOccupied(piece.current, frame)
+            if space != 0:
+                filledSpace = piece
+                whitePieces.remove(movedPiece)
+                whitePieces.append(filledSpace)
+                empty.remove(filledSpace)
+                empty.append(movedPiece)
+                print('Moved: ', movedPiece.name, 'from ', movedPiece.current.name, 'to ', filledSpace.current.name)
+                movedPiece.name, filledSpace.name = filledSpace.name, movedPiece.name #swap spaces
+                return
+        for piece in blackPieces:
+                space = checkOccupied(piece.current, frame)
+                if space !=1: #indicates taken piece
+                    movedPiece[0].current = piece.current
+                    blackPieces.remove(piece) # remove piece from the game
+                    whitePieces.remove(movedPiece)
+                    whitePieces.append(piece)
+                    print(movedPiece.name, 'took ', piece.name, 'on ', filledSpace.current.name)
+                    movedPiece.name, piece.name = piece.name, movedPiece.name #swap spaces
+                    return
+    print('Move not determined')
+
+
 board = cv2.imread('C:/Users/Jess/Documents/ChessVision/Training/Advanced Variation/start.jpg')
 boardDim = getBoardDim(board)
 boardSpaces = np.zeros((8,8)) 
 blackPieces = []
 whitePieces = []
+empty = []
+k = 0
+json_file = open('C:/Users/Jess/Documents/ChessVision/Training/model.json', 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+loaded_model = model_from_json(loaded_model_json)
+# load weights into new model
+loaded_model.load_weights("C:/Users/Jess/Documents/ChessVision/Training/model.h5")
+loaded_model.compile(loss = "sparse_categorical_crossentropy", optimizer = "sgd", metrics = ["accuracy"])
+loaded_model.summary()
 
-# gui
-from pyforms.basewidget import BaseWidget
-from pyforms.controls   import ControlFile
-from pyforms.controls   import ControlText
-from pyforms.controls   import ControlButton
-from pyforms.controls   import ControlLabel
+def main():
+    input('Press enter when ready to start a game\n')
+    turn = 1
+    print('Wait for the webcam to appear, then press c. A duplicate of the webcam will appear, drag and hold the mouse button to draw a rectangle around just the playing square.')
+    print('If you do not like the square, right click to redraw. When done, press c and then press r.')
+    print('When you make your move, press the space bar to trigger recording the move')
+    print('When game is done, press q to quit')
+    board, boardDim = newBoard()
+    boardSpaces, blackPieces, whitePieces, empty = newGame(board, boardDim)
+    #check starting positions
+    for i in range (0,8):
+        for j in range(0,8):
+            print(checkOccupied(boardSpaces[i][j], board))
 
-class ComputerVisionAlgorithm(BaseWidget):
+    videoCaptureObject = cv2.VideoCapture(0)
+    while(True):
+        ret, frame = videoCaptureObject.read()
+        cv2.imshow('Capturing Play',frame)
+        k = cv2.waitKey(1)
+        if(k == 32):
+            cv2.imwrite('C:/Users/Jess/Documents/ChessVision/Training/Webcam/newpic.jpg',frame) 
+            checkPosition(frame, turn, whitePieces, blackPieces, empty)
+            turn = turn + 1
+        if(cv2.waitKey(1) == ord('q')):
+            videoCaptureObject.release()
+            cv2.destroyAllWindows()
+            exit()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__('ChessVision')
+if __name__ == "__main__":
+    main()
 
-        #Definition of the forms fields
-        self._newgamebutton = ControlButton('New Game')
-        self._movebutton     = ControlButton('Move')
-        self._outputlabel = ControlLabel('To set up a new game, after you click New Game, your webcam will open. Position over the chessboard and press c. A duplicate image will pop up - drag your mouse to make a box over the 8x8 playing area. When finished, press c and then r.')
 
-        
-        #Define the event that will be called when the move button is processed
-        self._movebutton.value       = self.__moveEvent
-        #Define the event that will be called when the new game button is processed
-        self._newgamebutton.value       = self.__newgamebuttonEvent
-        #Define the organization of the Form Controls
-        self._formset = [
-            ('_outputlabel'),
-            ('_newgamebutton'),
-            '_movebutton'
-            
-        ]
     
     
-    def __newgamebuttonEvent(self):
-        newBoard = staticROI()
-        board = newBoard.croppedPlay
-        print(board.shape)
-        boardDim = getBoardDim(board)
-        boardSpaces, blackPieces, whitePieces = newGame(board, boardDim)
-        pass
-
-
-    def __moveEvent(self):
-        k = 32
-        pass
-
-if __name__ == '__main__':
     
-    start_app(ComputerVisionAlgorithm)
+    
