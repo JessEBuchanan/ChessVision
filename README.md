@@ -10,6 +10,8 @@ Future Growth:
 - Track sequences of moves to check accuracy against opening variations or endgame theory. Audio cue or visual cue from the program to indicate an error. 
 - Stats tracking 
 - Connect image collection to a real chess clock
+- More user friendly GUI
+- Refinement of model - train with images closer to image size from webcam
 
 
 Why care about training with a physical board? 
