@@ -15,7 +15,6 @@ from keras.layers import Dense
 from scikeras.wrappers import KerasClassifier, KerasRegressor
 import cv2
 import glob
-from pyforms import start_app
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout 
 from keras.preprocessing.image import ImageDataGenerator
@@ -94,11 +93,11 @@ model.add(Dense(128,activation="relu"))
 model.add(Dense(3, activation="softmax"))
 
 model.compile(loss = "sparse_categorical_crossentropy", optimizer = "sgd", metrics = ["accuracy"])
-
+model.summary()
 history = model.fit(x_train, t_train, batch_size = 32,epochs = 100, validation_data = (x_test, t_test))
 model_json = model.to_json()
-with open("model.json", "w") as json_file:
+with open("C:/Users/Jess/Documents/ChessVision/Training/model.json","w") as json_file:
     json_file.write(model_json)
-# serialize weights to HDF5
-model.save_weights("model.h5")
+#serialize weights to HDF5
+model.save_weights("C:/Users/Jess/Documents/ChessVision/Training/model.h5")
 print("Saved model to disk")
