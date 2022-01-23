@@ -1,0 +1,85 @@
+Model Training Notes: 
+
+Keras and TensorFlow
+
+Keras Sequential API model
+
+
+Model Summary: 
+
+Input layer accepts 100x100 pixel RGB images
+
+Hidden layers:
+Three 32-neuron convolutional 2D layers with maxpool2d
+One 64-neuron convolutional 2D layer with maxpool 2d
+One 128-neuron dense layer
+
+Output layer: 3 neurons for 3 classes (empty, occupied with black piece, occupied with white piece)
+
+All layers but output layer have ReLu activation function
+Output layer is softmax function
+
+Model loss: cross-entropy
+Optimizer: Stochastic Gradient Descent
+
+
+Training/Test Split: 80% training, 20% test
+Training Data: about 1100 images
+~ 350 black occupied
+~ 350 white occupied
+~ 400 empty 
+
+Images resized to 100 x 100 pixels
+Scaled to 0-1 range by dividing pixel values by 255
+
+Keras ImageDataGenerator used to standardize/normalize images: 
+
+datagen = ImageDataGenerator(
+        featurewise_center=False,  # set input mean to 0 over the dataset
+        samplewise_center=False,  # set each sample mean to 0
+        featurewise_std_normalization=False,  # divide inputs by std of the dataset
+        samplewise_std_normalization=False,  # divide each input by its std
+        zca_whitening=False,  # apply ZCA whitening
+        rotation_range = 30,  # randomly rotate images in the range (degrees, 0 to 180)
+        zoom_range = 0.2, # Randomly zoom image 
+        width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+        height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+        horizontal_flip = True,  # randomly flip images
+        vertical_flip=False)  # randomly flip images
+
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #
+=================================================================
+ conv2d (Conv2D)             (None, 100, 100, 32)      896
+
+ max_pooling2d (MaxPooling2D  (None, 50, 50, 32)       0
+ )
+
+ conv2d_1 (Conv2D)           (None, 50, 50, 32)        9248
+
+ max_pooling2d_1 (MaxPooling  (None, 25, 25, 32)       0
+ 2D)
+
+ conv2d_2 (Conv2D)           (None, 25, 25, 32)        9248
+
+ max_pooling2d_2 (MaxPooling  (None, 12, 12, 32)       0
+ 2D)
+
+ conv2d_3 (Conv2D)           (None, 12, 12, 64)        18496
+
+ max_pooling2d_3 (MaxPooling  (None, 6, 6, 64)         0
+ 2D)
+
+ dropout (Dropout)           (None, 6, 6, 64)          0
+
+ flatten (Flatten)           (None, 2304)              0
+
+ dense (Dense)               (None, 128)               295040
+
+ dense_1 (Dense)             (None, 3)                 387
+
+=================================================================
+Total params: 333,315
+Trainable params: 333,315
+Non-trainable params: 0
